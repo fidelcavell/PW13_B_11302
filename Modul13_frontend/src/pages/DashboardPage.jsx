@@ -1,14 +1,41 @@
 import { useEffect, useState } from "react";
-import { Alert, Col, Container, Row, Spinner, Stack } from "react-bootstrap";
+import {
+  Alert,
+  Col,
+  Container,
+  Row,
+  Spinner,
+  Stack,
+  Button,
+} from "react-bootstrap";
+import { FaStopwatch } from "react-icons/fa";
+import { toast } from "react-toastify";
+
 import { GetAllContents } from "../api/apiContent";
 import { getThumbnail } from "../api";
+import { CreateWatchList } from "../api/apiWatchLater";
 
 const DashboardPage = () => {
   const [contents, setContents] = useState([]);
+  const [idUser, setIdUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const createWatchList = (idUser, idContent) => {
+    CreateWatchList(idUser, idContent)
+      .then((response) => {
+        toast.success(response.message);
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.warn(JSON.stringify(err.message));
+      });
+  };
+
   useEffect(() => {
+    const user = JSON.parse(sessionStorage.getItem('user'));
+    setIdUser(user.id);
     setIsLoading(true);
+    
     GetAllContents()
       .then((data) => {
         setContents(data);
@@ -53,6 +80,14 @@ const DashboardPage = () => {
                 <div className="card-body">
                   <h5 className="card-title text-truncate">{content.title}</h5>
                   <p className="card-text">{content.description}</p>
+                  <div className="d-flex justify-content-end">
+                    <Button
+                      variant="success"
+                      onClick={() => createWatchList(idUser, content.id)}
+                    >
+                      <FaStopwatch className="mx-1 mb-1" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Col>
